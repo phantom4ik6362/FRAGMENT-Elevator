@@ -14,39 +14,46 @@ def main():
     print(f"Booting ELEVATOR.OS v{version}\n")
     print(f"CONTEXT: {highest_floor}-story building\nCurrently on {start_floor} floor\n")
 
-    time_to_stop = False # Argument responsible for state of the cycle.
+    time_to_stop = False # Flag-variable responsible for state of the cycle.
     current_floor = start_floor
 
-    while not time_to_stop:
-        cmd = input("%/: ").strip().lower()
+    while not time_to_stop: # Main cycle
+        cmd = input("%/: ").strip().lower() # user input (string)
+        if cmd == "":
+            print("Error. Command is incomplete.")
+            continue
         if cmd == "exit":
             print("Shutting down...")
             time_to_stop = True
         elif cmd == "help":
             print()
         else:
-            cmd_list = cmd.split()
-            if cmd_list[0] == "go":
-                plan = []
-                if len(cmd_list) < 3:
+            cmd_list = cmd.split() # user's input transforms into a list
+            if cmd_list[0] == "go": # cmd "go" is spotted
+                plan = [] # unverified list of potential floors
+                if len(cmd_list) < 3: # command length test
                     print("Error. Command is incomplete.")
                     continue
-                if cmd_list[-1] != "up" and cmd_list[-1] != "down":
+                if cmd_list[-1] != "up" and cmd_list[-1] != "down": # argument checks
                     print(f"Error. (up/down) argument missing")
                     continue
                 vertical = cmd_list[-1]
                 cmd_list.pop(0)
                 cmd_list.pop(-1)
-                for el in cmd_list:
+                error = False
+                for el in cmd_list: # remaining numbers are being appended to plan
                     try:
                         el = int(el)
                         plan.append(el)
                     except ValueError:
                         print(f"Error. [{el}] is not a valid number.")
+                        error = True
                         break
-                verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan)
+                if error: # variable to transfer error out of the cycle
+                    continue
+                verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan) # function validates data
 
-                route = plan_route(current_floor, verified_plan, vertical)
+                route = plan_route(current_floor, verified_plan, vertical) # function builds correct route
                 print(route)
                 
             else:
@@ -56,4 +63,4 @@ def main():
             
 
 if __name__ == "__main__":
-    main()
+    main() # Starts main loop in case of a correct entry point
