@@ -29,4 +29,13 @@ def plan_route(current_floor, plan_bulk, vertical):
     return route
 
 
-print(plan_route(3, [8, 5, 6, 9, 4, 1, 2], "down"))
+# Function recives four arguments. Current floor (to exclude it from the list)
+# Lowest floor, to make sure selected floor is not lower than lowest possible, and the same with highest.
+# It also removes dublicates.
+def validate_plan(current_floor, lowest_floor, highest_floor, plan):
+    valid_plan = []
+    plan = list(dict.fromkeys(plan))
+    for floor in plan:
+        if lowest_floor <= floor <= highest_floor and floor != current_floor:
+            valid_plan.append(floor)
+    return valid_plan
