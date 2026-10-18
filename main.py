@@ -52,10 +52,43 @@ def main():
                 if error: # variable to transfer error out of the cycle
                     continue
                 verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan) # function validates data
-
                 route = plan_route(current_floor, verified_plan, vertical) # function builds correct route
-                print(route)
-                
+                print(f"Success! Current route: {route}") 
+                while route:    
+                    print(f"Elevator moved from {current_floor} to {route[0]}")
+                    buttonbox_used = False
+                    current_floor = route[0]
+                    route.pop(0)
+                    selected_buttons = []
+                    while not buttonbox_used:   
+                        inelevator_button = input("Elevator doors have opened...\n---\nElevator door have closed...\n\nAny more floors selected?(yes 1 2 3/no): ").lower().strip()
+                        if inelevator_button == "no":
+                            buttonbox_used = True
+                        elif inelevator_button == "exit":
+                            print("Shutting down...")
+                            time_to_stop = True
+                            buttonbox_used = True
+                        else:
+                            inelevator_button = inelevator_button.split()
+                            if len(inelevator_button) < 2:
+                                print("Error. Try again (no/yes 4 5 6)")
+                                continue
+                            else:
+                                if inelevator_button[0] == "yes":
+                                    inelevator_button.pop(0)
+                                    try:
+                                        inelevator_button = list(map(int, inelevator_button))
+                                    except ValueError:
+                                        print("Error. Try again (no/yes 4 5 6)")
+                                        continue
+                                    selected_buttons = inelevator_button
+                                    buttonbox_used = True                                        
+                                else:
+                                    print("Error. Try again (no/yes 4 5 6)")
+                    verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
+                    new_route = route + verified_selectedbuttons
+                    route = plan_route(current_floor, new_route, vertical)
+    
             else:
                 print("Error. Command unidenified. try help for help")
 
