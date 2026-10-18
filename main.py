@@ -10,6 +10,38 @@ lowest_floor = 1
 highest_floor = 8
 start_floor = 4
 
+def request_buttoninput():
+    cyclecontrol_variable = False
+    time_to_stop = False
+    selected_buttons = []
+    while not cyclecontrol_variable:   
+        inelevator_button = input("Elevator doors have opened...\n---\nElevator door have closed...\n\nAny more floors selected?(yes 1 2 3/no): ").lower().strip()
+        if inelevator_button == "no":
+            cyclecontrol_variable = True
+        elif inelevator_button == "exit":
+            print("Shutting down...")
+            time_to_stop = True
+            cyclecontrol_variable = True
+        else:
+            inelevator_button = inelevator_button.split()
+            if len(inelevator_button) < 2:
+                print("Error. Try again (no/yes 4 5 6)")
+                continue
+            else:
+                if inelevator_button[0] == "yes":
+                    inelevator_button.pop(0)
+                    try:
+                        inelevator_button = list(map(int, inelevator_button))
+                    except ValueError:
+                        print("Error. Try again (no/yes 4 5 6)")
+                        continue
+                    selected_buttons = inelevator_button
+                    cyclecontrol_variable = True                                        
+                else:
+                    print("Error. Try again (no/yes 4 5 6)")
+    return selected_buttons, time_to_stop
+
+
 def main():
     print(f"Booting ELEVATOR.OS v{version}\n")
     print(f"CONTEXT: {highest_floor}-story building\nCurrently on {start_floor} floor\n")
@@ -56,44 +88,17 @@ def main():
                 print(f"Success! Current route: {route}") 
                 while route:    
                     print(f"Elevator moved from {current_floor} to {route[0]}")
-                    buttonbox_used = False
                     current_floor = route[0]
                     route.pop(0)
-                    selected_buttons = []
-                    while not buttonbox_used:   
-                        inelevator_button = input("Elevator doors have opened...\n---\nElevator door have closed...\n\nAny more floors selected?(yes 1 2 3/no): ").lower().strip()
-                        if inelevator_button == "no":
-                            buttonbox_used = True
-                        elif inelevator_button == "exit":
-                            print("Shutting down...")
-                            time_to_stop = True
-                            buttonbox_used = True
-                        else:
-                            inelevator_button = inelevator_button.split()
-                            if len(inelevator_button) < 2:
-                                print("Error. Try again (no/yes 4 5 6)")
-                                continue
-                            else:
-                                if inelevator_button[0] == "yes":
-                                    inelevator_button.pop(0)
-                                    try:
-                                        inelevator_button = list(map(int, inelevator_button))
-                                    except ValueError:
-                                        print("Error. Try again (no/yes 4 5 6)")
-                                        continue
-                                    selected_buttons = inelevator_button
-                                    buttonbox_used = True                                        
-                                else:
-                                    print("Error. Try again (no/yes 4 5 6)")
+                    selected_buttons, time_to_stop = request_buttoninput()
+                    if time_to_stop:
+                        break
                     verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
                     new_route = route + verified_selectedbuttons
                     route = plan_route(current_floor, new_route, vertical)
-    
             else:
                 print("Error. Command unidenified. try help for help")
 
-                
-            
 
 if __name__ == "__main__":
     main() # Starts main loop in case of a correct entry point
