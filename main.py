@@ -8,7 +8,7 @@ version = "0.1"
 # And a starting floor
 lowest_floor = 1
 highest_floor = 8
-start_floor = 4
+start_floor = 1
 
 def request_buttoninput():
     cyclecontrol_variable = False
@@ -96,6 +96,7 @@ def main():
                     verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
                     new_route = route + verified_selectedbuttons
                     route = plan_route(current_floor, new_route, vertical)
+                print("Route completed. use GO for next one or exit to quit\n")
             else:
                 print("Error. Command unidenified. try help for help")
 
