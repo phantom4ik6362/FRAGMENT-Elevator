@@ -83,7 +83,7 @@ def main():
                 cmd_list.pop(0)
                 cmd_list.pop(-1)
                 try:
-                    cmd_list[0] = int(cmd_list[0])
+                    cmd_list[0] = int(cmd_list[0]) # transfers order floor to an int
                 except ValueError:
                     print("Error. The floor elevator was called from must be a number.")
                     continue
@@ -97,7 +97,7 @@ def main():
                     print("Error. The floor elevator was called is not in range.")
                     continue
                 awaiting_input = True
-                while awaiting_input:
+                while awaiting_input: # a place where we get info about buttons inside pressed
                     current_floor = cmd_list[0]
                     plan = input(f"Elevator arrived to {cmd_list[0]} floor. Please insert what buttons were pressed: ").lower().strip()
                     if plan == "exit":
@@ -114,22 +114,21 @@ def main():
                     except ValueError:
                         print("Error. Try again.")
                         continue
-                    if has_out_of_range(lowest_floor, highest_floor, plan):
+                    if has_out_of_range(lowest_floor, highest_floor, plan): # using function to check, are all the selected floors really availible
                         print("Selected floor (floors) out of range.")
                         continue
                     verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan) # function validates data
                     route = plan_route(current_floor, verified_plan, vertical) # function builds correct route
                     awaiting_input = False
                     print(f"Success! Current route: {route}") 
-                    while route:    
+                    while route: # executes route
                         print(f"Elevator moved from {current_floor} to {route[0]}")
                         current_floor = route[0]
                         route.pop(0)
                         selected_buttons, time_to_stop = request_buttoninput()
                         if time_to_stop:
-                            awaiting_input = False
                             break
-                        verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
+                        verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons) 
                         new_route = route + verified_selectedbuttons
                         route = plan_route(current_floor, new_route, vertical)
                     if time_to_stop:
