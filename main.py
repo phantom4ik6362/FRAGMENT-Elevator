@@ -41,7 +41,7 @@ def request_buttoninput():
                     print("Error. Try again (no/yes 4 5 6)")
     return selected_buttons, time_to_stop
 
-def check_outofrange(lowest_floor, highest_floor, plan):
+def has_out_of_range(lowest_floor, highest_floor, plan):
     outofrange = False
     for el in plan:
         if el <= highest_floor and el >= lowest_floor:
@@ -77,16 +77,21 @@ def main():
                     print("Error. Command is incomplete.")
                     continue
                 if cmd_list[-1] != "up" and cmd_list[-1] != "down": # argument checks
-                    print(f"Error. (up/down) argument missing")
+                    print("Error. (up/down) argument missing")
                     continue
                 vertical = cmd_list[-1]
                 cmd_list.pop(0)
                 cmd_list.pop(-1)
-                error = False
                 try:
                     cmd_list[0] = int(cmd_list[0])
                 except ValueError:
                     print("Error. The floor elevator was called from must be a number.")
+                    continue
+                if cmd_list[0] == highest_floor and vertical == "up":
+                    print("Error. You can't go up from the top floor.")
+                    continue
+                elif cmd_list[0] == lowest_floor and vertical == "down":
+                    print("Error. You can't go down from the lowest floor.")
                     continue
                 if cmd_list[0] < lowest_floor or cmd_list[0] > highest_floor:
                     print("Error. The floor elevator was called is not in range.")
@@ -94,19 +99,22 @@ def main():
                 awaiting_input = True
                 while awaiting_input:
                     current_floor = cmd_list[0]
-                    plan = input(f"Elevator arrived to {cmd_list[0]} floor. Please insert what buttons were pressed: ")
+                    plan = input(f"Elevator arrived to {cmd_list[0]} floor. Please insert what buttons were pressed: ").lower().strip()
                     if plan == "exit":
                         print("Shutting down...")
                         awaiting_input = False
                         time_to_stop = True
-                        break
+                        continue
+                    elif len(plan) == 0:
+                        print("Error. Try again.")
+                        continue
                     plan = plan.split()
                     try:
                         plan = list(map(int, plan))
                     except ValueError:
                         print("Error. Try again.")
                         continue
-                    if check_outofrange(lowest_floor, highest_floor, plan):
+                    if has_out_of_range(lowest_floor, highest_floor, plan):
                         print("Selected floor (floors) out of range.")
                         continue
                     verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan) # function validates data
@@ -119,10 +127,13 @@ def main():
                         route.pop(0)
                         selected_buttons, time_to_stop = request_buttoninput()
                         if time_to_stop:
+                            awaiting_input = False
                             break
                         verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
                         new_route = route + verified_selectedbuttons
                         route = plan_route(current_floor, new_route, vertical)
+                    if time_to_stop:
+                        break
                     print("Route completed. use GO for next one or exit to quit\n")
             else:
                 print("Error. Command unidenified. try help for help")
