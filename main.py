@@ -41,6 +41,16 @@ def request_buttoninput():
                     print("Error. Try again (no/yes 4 5 6)")
     return selected_buttons, time_to_stop
 
+def check_outofrange(lowest_floor, highest_floor, plan):
+    outofrange = False
+    for el in plan:
+        if el <= highest_floor and el >= lowest_floor:
+            continue
+        else:
+            outofrange = True
+            break
+    return outofrange
+
 
 def main():
     print(f"Booting ELEVATOR.OS v{version}\n")
@@ -63,7 +73,7 @@ def main():
             cmd_list = cmd.split() # user's input transforms into a list
             if cmd_list[0] == "go": # cmd "go" is spotted
                 plan = [] # unverified list of potential floors
-                if len(cmd_list) < 3: # command length test
+                if len(cmd_list) != 3: # command length test
                     print("Error. Command is incomplete.")
                     continue
                 if cmd_list[-1] != "up" and cmd_list[-1] != "down": # argument checks
@@ -73,33 +83,49 @@ def main():
                 cmd_list.pop(0)
                 cmd_list.pop(-1)
                 error = False
-                for el in cmd_list: # remaining numbers are being appended to plan
-                    try:
-                        el = int(el)
-                        plan.append(el)
-                    except ValueError:
-                        print(f"Error. [{el}] is not a valid number.")
-                        error = True
-                        break
-                if error: # variable to transfer error out of the cycle
+                try:
+                    cmd_list[0] = int(cmd_list[0])
+                except ValueError:
+                    print("Error. The floor elevator was called from must be a number.")
                     continue
-                verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan) # function validates data
-                route = plan_route(current_floor, verified_plan, vertical) # function builds correct route
-                print(f"Success! Current route: {route}") 
-                while route:    
-                    print(f"Elevator moved from {current_floor} to {route[0]}")
-                    current_floor = route[0]
-                    route.pop(0)
-                    selected_buttons, time_to_stop = request_buttoninput()
-                    if time_to_stop:
+                if cmd_list[0] < lowest_floor or cmd_list[0] > highest_floor:
+                    print("Error. The floor elevator was called is not in range.")
+                    continue
+                awaiting_input = True
+                while awaiting_input:
+                    current_floor = cmd_list[0]
+                    plan = input(f"Elevator arrived to {cmd_list[0]} floor. Please insert what buttons were pressed: ")
+                    if plan == "exit":
+                        print("Shutting down...")
+                        awaiting_input = False
+                        time_to_stop = True
                         break
-                    verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
-                    new_route = route + verified_selectedbuttons
-                    route = plan_route(current_floor, new_route, vertical)
-                print("Route completed. use GO for next one or exit to quit\n")
+                    plan = plan.split()
+                    try:
+                        plan = list(map(int, plan))
+                    except ValueError:
+                        print("Error. Try again.")
+                        continue
+                    if check_outofrange(lowest_floor, highest_floor, plan):
+                        print("Selected floor (floors) out of range.")
+                        continue
+                    verified_plan = validate_plan(current_floor, lowest_floor, highest_floor, plan) # function validates data
+                    route = plan_route(current_floor, verified_plan, vertical) # function builds correct route
+                    awaiting_input = False
+                    print(f"Success! Current route: {route}") 
+                    while route:    
+                        print(f"Elevator moved from {current_floor} to {route[0]}")
+                        current_floor = route[0]
+                        route.pop(0)
+                        selected_buttons, time_to_stop = request_buttoninput()
+                        if time_to_stop:
+                            break
+                        verified_selectedbuttons = validate_plan(current_floor, lowest_floor, highest_floor, selected_buttons)
+                        new_route = route + verified_selectedbuttons
+                        route = plan_route(current_floor, new_route, vertical)
+                    print("Route completed. use GO for next one or exit to quit\n")
             else:
                 print("Error. Command unidenified. try help for help")
-
 
 if __name__ == "__main__":
     main() # Starts main loop in case of a correct entry point
